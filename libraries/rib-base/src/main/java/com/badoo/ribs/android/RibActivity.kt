@@ -3,10 +3,13 @@ package com.badoo.ribs.android
 import android.content.Intent
 import android.os.Bundle
 import android.view.ViewGroup
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModel
 import com.badoo.ribs.android.activitystarter.ActivityBoundary
 import com.badoo.ribs.android.activitystarter.ActivityStarter
+import com.badoo.ribs.android.context.LifecycleScoped
 import com.badoo.ribs.android.dialog.Dialog
 import com.badoo.ribs.android.dialog.DialogLauncher
 import com.badoo.ribs.android.dialog.toAlertDialog
@@ -18,6 +21,8 @@ import com.badoo.ribs.core.view.RibView
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import java.util.*
+import kotlin.collections.HashMap
+import kotlin.reflect.KClass
 
 /**
  * Helper class for root [Rib] integration.
@@ -64,8 +69,11 @@ abstract class RibActivity : AppCompatActivity(), DialogLauncher {
         super.onCreate(savedInstanceState)
         requestCodeRegistry = RequestCodeRegistry(savedInstanceState)
 
-        root = createRib(savedInstanceState)
-        root.node.onCreate()
+        val rootHolder by viewModels<RootHolderImpl>()
+        root = rootHolder.root ?: createRib(savedInstanceState).also {
+            rootHolder.root = it
+            it.node.onCreate()
+        }
         rootViewHost = AndroidRibViewHost(rootViewGroup)
         rootViewHost.attachChild(root.node)
 
@@ -125,7 +133,6 @@ abstract class RibActivity : AppCompatActivity(), DialogLauncher {
         super.onDestroy()
         dialogs.values.forEach { it.dismiss() }
         rootViewHost.detachChild(root.node)
-        root.node.onDestroy()
     }
 
     override fun onBackPressed() {
@@ -150,5 +157,26 @@ abstract class RibActivity : AppCompatActivity(), DialogLauncher {
 
     override fun hide(dialog: Dialog<*>) {
         dialogs[dialog]?.dismiss()
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    protected inline fun <reified Value> getActivityScoped(): LifecycleScoped<Value> {
+        val rootHolder by viewModels<RootHolderImpl>()
+        var value = rootHolder.scoped[Value::class] as LifecycleScoped<Value>?
+        if (value == null) {
+            value = LifecycleScoped()
+            rootHolder.scoped[Value::class] = value
+        }
+        return value
+    }
+
+    class RootHolderImpl : ViewModel() {
+        val scoped = HashMap<KClass<*>, LifecycleScoped<*>>()
+        var root: Rib? = null
+
+        override fun onCleared() {
+            super.onCleared()
+            root?.node?.onDestroy()
+        }
     }
 }

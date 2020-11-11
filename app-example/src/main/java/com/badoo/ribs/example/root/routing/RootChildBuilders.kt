@@ -1,5 +1,8 @@
 package com.badoo.ribs.example.root.routing
 
+import com.badoo.ribs.android.context.Scoped
+import com.badoo.ribs.example.android.NavBarController
+import com.badoo.ribs.example.android.NavBarControllerImpl
 import com.badoo.ribs.example.auth.AuthDataSource
 import com.badoo.ribs.example.logged_in_container.LoggedInContainer
 import com.badoo.ribs.example.logged_in_container.LoggedInContainerBuilder
@@ -11,7 +14,11 @@ internal class RootChildBuilders(
     dependency: Root.Dependency,
     authDataSource: AuthDataSource
 ) {
-    private val subtreeDeps = SubtreeDependency(dependency, authDataSource)
+    private val subtreeDeps = SubtreeDependency(
+        dependency,
+        authDataSource,
+        dependency.statusBarController.map { NavBarControllerImpl(it) }
+    )
 
     val loggedInContainerBuilder =
         LoggedInContainerBuilder(
@@ -24,7 +31,8 @@ internal class RootChildBuilders(
 
     private class SubtreeDependency(
         dependency: Root.Dependency,
-        override val authDataSource: AuthDataSource
+        override val authDataSource: AuthDataSource,
+        override val navBarController: Scoped<NavBarController>
     ) : Root.Dependency by dependency,
         LoggedOutContainer.Dependency,
         LoggedInContainer.Dependency

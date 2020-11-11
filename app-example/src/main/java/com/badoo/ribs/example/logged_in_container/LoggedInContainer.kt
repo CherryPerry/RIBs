@@ -1,8 +1,10 @@
 package com.badoo.ribs.example.logged_in_container
 
+import com.badoo.ribs.android.context.Scoped
 import com.badoo.ribs.clienthelper.connector.Connectable
 import com.badoo.ribs.core.Rib
 import com.badoo.ribs.core.customisation.RibCustomisation
+import com.badoo.ribs.example.android.NavBarController
 import com.badoo.ribs.example.auth.AuthDataSource
 import com.badoo.ribs.example.logged_in_container.LoggedInContainer.Input
 import com.badoo.ribs.example.logged_in_container.LoggedInContainer.Output
@@ -15,6 +17,7 @@ interface LoggedInContainer : Rib, Connectable<Input, Output> {
     interface Dependency {
         val authDataSource: AuthDataSource
         val api: UnsplashApi
+        val navBarController: Scoped<NavBarController>
     }
 
     sealed class Input

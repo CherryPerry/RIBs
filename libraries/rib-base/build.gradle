@@ -11,6 +11,7 @@ dependencies {
     api deps.android.appCompat
 
     implementation deps.android.lifecycleCommon
+    implementation deps.android.activityKtx
     compileOnly deps.android.annotations
     implementation deps.external.kotlinStdlib
     implementation deps.external.rxrelay2

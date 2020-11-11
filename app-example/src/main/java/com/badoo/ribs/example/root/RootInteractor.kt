@@ -2,8 +2,11 @@ package com.badoo.ribs.example.root
 
 import androidx.lifecycle.Lifecycle
 import com.badoo.mvicore.android.lifecycle.createDestroy
+import com.badoo.ribs.android.context.Scoped
+import com.badoo.ribs.android.subscribe
 import com.badoo.ribs.clienthelper.interactor.Interactor
 import com.badoo.ribs.core.modality.BuildParams
+import com.badoo.ribs.example.android.StatusBarController
 import com.badoo.ribs.example.auth.AuthDataSource
 import com.badoo.ribs.example.auth.AuthState
 import com.badoo.ribs.example.root.routing.RootRouter.Configuration
@@ -16,7 +19,8 @@ import io.reactivex.functions.Consumer
 internal class RootInteractor(
     buildParams: BuildParams<*>,
     private val backStack: BackStackFeature<Configuration>,
-    private val authDataSource: AuthDataSource
+    private val authDataSource: AuthDataSource,
+    private val statusBarController: Scoped<StatusBarController>
 ) : Interactor<Root, Nothing>(
     buildParams = buildParams
 ) {
@@ -25,6 +29,9 @@ internal class RootInteractor(
         nodeLifecycle.createDestroy {
             bind(authDataSource.authUpdates to authStatConsumer)
         }
+        nodeLifecycle.subscribe(
+            onStart = { statusBarController.value.applyStatusBarColor() }
+        )
     }
 
     private val authStatConsumer = Consumer<AuthState> { state ->

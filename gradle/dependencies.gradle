@@ -42,7 +42,7 @@ def agp
 if (useCompose) {
     agp = 'com.android.tools.build:gradle:4.2.0-alpha04'
 } else {
-    agp = 'com.android.tools.build:gradle:4.0.0'
+    agp = 'com.android.tools.build:gradle:4.1.1'
 }
 
 def build = [
@@ -68,6 +68,7 @@ def android = [
     annotations: "androidx.annotation:annotation:${versions.androidxAnnotationVersion}",
     appCompat: "androidx.appcompat:appcompat:${versions.androidxAppCompatVersion}",
     lifecycleCommon: "androidx.lifecycle:lifecycle-common-java8:${versions.androidxLifecycleVersion}",
+    activityKtx: "androidx.activity:activity-ktx:1.1.0",
     constraintLayout: "androidx.constraintlayout:constraintlayout:${versions.androidxConstraintLayoutVersion}",
     design: "com.google.android.material:material:${versions.materialVersion}",
     percent: "androidx.percentlayout:percentlayout:${versions.androidxPercentLayoutVersion}",
