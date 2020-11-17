@@ -2,6 +2,8 @@ package com.badoo.ribs.android
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.ViewGroup
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
@@ -176,7 +178,11 @@ abstract class RibActivity : AppCompatActivity(), DialogLauncher {
 
         override fun onCleared() {
             super.onCleared()
-            root?.node?.onDestroy()
+            // onCleared is invoked before Activity onDestroy
+            Handler(Looper.getMainLooper()).post {
+                root?.node?.onDestroy()
+                root = null
+            }
         }
     }
 }
