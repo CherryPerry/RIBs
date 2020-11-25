@@ -29,6 +29,7 @@ import com.badoo.ribs.core.plugin.SystemAware
 import com.badoo.ribs.core.plugin.ViewAware
 import com.badoo.ribs.core.plugin.ViewLifecycleAware
 import com.badoo.ribs.core.view.RibView
+import com.badoo.ribs.store.Store
 import com.badoo.ribs.util.RIBs
 
 /**
@@ -179,7 +180,7 @@ open class Node<V : RibView>(
         }
     }
 
-    open fun onDestroy() {
+    open fun onDestroy(recreateSoon: Boolean) {
         if (view != null) {
             RIBs.errorHandler.handleNonFatalError(
                 "View was not detached before node detach!",
@@ -189,9 +190,12 @@ open class Node<V : RibView>(
 
         lifecycleManager.onDestroy()
         plugins.filterIsInstance<NodeLifecycleAware>().forEach { it.onDestroy() }
+        if (!recreateSoon) {
+            Store.removeAll(identifier)
+        }
 
         for (child in children.toList()) {
-            detachChildNode(child)
+            detachChildNode(child, recreateSoon)
         }
 
         isPendingDetach = false
@@ -258,7 +262,6 @@ open class Node<V : RibView>(
     }
 
 
-
     /**
      * Detaches the node from this parent. NOTE: No consumers of
      * this API should ever keep a reference to the detached child, leak canary will enforce
@@ -267,10 +270,10 @@ open class Node<V : RibView>(
      * @param child the [Node] to be detached.
      */
     @MainThread
-    fun detachChildNode(child: Node<*>) {
+    fun detachChildNode(child: Node<*>, recreateSoon: Boolean) {
         plugins.filterIsInstance<SubtreeChangeAware>().forEach { it.onChildDetached(child) }
         _children.remove(child)
-        child.onDestroy()
+        child.onDestroy(recreateSoon)
     }
 
     internal fun markPendingViewDetach(isPendingViewDetach: Boolean) {
