@@ -2,27 +2,29 @@ package com.badoo.ribs.test
 
 import android.os.Bundle
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.annotation.StyleRes
 import com.badoo.ribs.android.RibActivity
 import com.badoo.ribs.core.Rib
-import com.badoo.ribs.test.activity.R
 
-class RibTestActivity : RibActivity() {
+open class RibTestActivity : RibActivity() {
 
     lateinit var rib: Rib
         private set
 
-    override val rootViewGroup: ViewGroup
-        get() = findViewById(R.id.rib_test_root)
+    override lateinit var rootViewGroup: ViewGroup
 
     override fun onCreate(savedInstanceState: Bundle?) {
         THEME?.also { setTheme(it) }
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.rib_test)
+        rootViewGroup = FrameLayout(this)
+        setContentView(rootViewGroup)
     }
 
     override fun createRib(savedInstanceState: Bundle?): Rib =
-        requireNotNull(RIB_FACTORY).invoke(this, savedInstanceState).also { rib = it }
+        requireNotNull(RIB_FACTORY) { "Factory is not provided, do you use your JUnit Rule correctly?" }
+            .invoke(this, savedInstanceState)
+            .also { rib = it }
 
     companion object {
         @StyleRes
