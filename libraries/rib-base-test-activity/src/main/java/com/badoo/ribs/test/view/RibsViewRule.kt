@@ -4,8 +4,6 @@ import androidx.annotation.StyleRes
 import androidx.test.rule.ActivityTestRule
 import com.badoo.ribs.core.view.RibView
 import com.badoo.ribs.core.view.ViewFactory
-import org.junit.runner.Description
-import org.junit.runners.model.Statement
 
 open class RibsViewRule<View : RibView>(
     private val launchActivity: Boolean = true,
@@ -17,18 +15,14 @@ open class RibsViewRule<View : RibView>(
     val view: View
         get() = activity.view as View
 
-    override fun apply(base: Statement, description: Description): Statement {
-        val activityStatement = super.apply(base, description)
-        return object : Statement() {
-            override fun evaluate() {
-                try {
-                    setup()
-                    activityStatement.evaluate()
-                } finally {
-                    reset()
-                }
-            }
-        }
+    override fun beforeActivityLaunched() {
+        super.beforeActivityLaunched()
+        setup()
+    }
+
+    override fun afterActivityFinished() {
+        super.afterActivityFinished()
+        reset()
     }
 
     private fun setup() {
