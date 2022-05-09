@@ -1,9 +1,9 @@
 package com.badoo.ribs.routing.source.backstack.operation
 
 import android.os.Parcelable
-import com.badoo.ribs.routing.source.backstack.BackStack
 import com.badoo.ribs.routing.Routing
 import com.badoo.ribs.routing.history.RoutingHistoryElement
+import com.badoo.ribs.routing.source.backstack.BackStack
 import com.badoo.ribs.routing.source.backstack.Elements
 
 /**
@@ -21,7 +21,7 @@ data class PushOverlay<C : Parcelable>(
     override fun invoke(elements: Elements<C>): Elements<C> =
         elements.replaceLastWith(
             elements.last().copy(
-                overlays = elements.last().overlays + Routing(configuration)
+                overlays = elements.last().overlays + Routing(configuration = configuration, meta = Routing.Meta.Default(isOverlay = true))
             )
         )
 
